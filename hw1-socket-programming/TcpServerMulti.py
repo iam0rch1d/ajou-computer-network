@@ -5,19 +5,11 @@ import threading
 def create_link(_socket):
     global user_no
 
-    thread.append(Communication(tcp_socket))
+    thread.append(Communication(_socket))
 
     thread[user_no].daemon = True
 
     thread[user_no].start()
-
-
-def send_to_client(_message):
-    try:
-        for user in thread:
-            user.message.send(_message)
-    except Exception as _exception:
-        pass
 
 
 class Communication(threading.Thread):
@@ -53,21 +45,21 @@ class Communication(threading.Thread):
 
     def receive(self):
         while True:
-            data = (self.message.recv(4096).decode('utf-8'))
+            data = (self.message.recv(4096)).decode('utf-8')
 
             if data == '/exit':
                 relay = ('%s has left chat room.' % (self.user_id[1])).encode('utf-8')
 
                 print(relay.decode('utf-8'))
                 self.exit()
-                send_to_client(relay)
+                self.send_to_client(relay)
 
                 break
             else:
                 relay = ('%s : %s' % (self.user_id[1], data)).encode('utf-8')
 
                 print(relay.decode('utf-8'))
-                send_to_client(relay)
+                self.send_to_client(relay)
 
     def exit(self):
         global user_no
@@ -83,6 +75,14 @@ class Communication(threading.Thread):
                 break
 
         self.message.close()
+
+    @staticmethod
+    def send_to_client(_message):
+        try:
+            for user in thread:
+                user.message.send(_message)
+        except Exception as _exception:
+            pass
 
     @staticmethod
     def notify(_notification):

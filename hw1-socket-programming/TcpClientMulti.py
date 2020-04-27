@@ -1,15 +1,16 @@
 from socket import *
 import threading
+import atexit
 
 
 def send(_socket):
     while True:
         message = input()
 
+        _socket.send(message.encode('utf-8'))
+
         if message == '/exit':
             break
-
-        _socket.send(message.encode('utf-8'))
 
     _socket.close()
 
